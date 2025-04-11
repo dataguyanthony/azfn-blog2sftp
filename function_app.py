@@ -17,13 +17,14 @@ def get_secret_from_key_vault(vault_url, secret_name):
     secret = client.get_secret(secret_name)
     return secret.value
 
-@app.blob_trigger(arg_name="myblob", path="${STORAGE_ACCOUNT_FILE_PATH}/{name}", connection="STORAGE_ACCOUNT") 
+@app.blob_trigger(arg_name="myblob", path="${STORAGE_ACCOUNT_PATH}", connection="STORAGE_ACCOUNT") 
 def ascii2sftp(myblob: func.InputStream):
     # Variables for SFTP connection and retry logic
-    vault_url = os.environ["KEY_VAULT_URL"]
-    sftp_host = os.environ["SFTP_HOST"]
-    sftp_username = os.environ["SFTP_USERNAME"]
-    sftp_password_secretname = os.environ["SFTP_PASSWORD_SECRETNAME"]
+    vault_url = "https://${KEY_VAULT_NAME}.vault.azure.net/"
+    sftp_host = "${SFTP_HOST}"
+    sftp_username = "${SFTP_USERNAME}"
+    sftp_password_secretname = "${SFTP_PASSWORD_SECRETNAME}"
+    sftp_filepath = "${SFTP_PATH}"
     sftp_max_retries = 3
     sftp_retry_delay_in_seconds = 15
     
@@ -47,7 +48,7 @@ def ascii2sftp(myblob: func.InputStream):
             sftp = paramiko.SFTPClient.from_transport(transport)
 
             # Save the ASCII content to a file on the SFTP server
-            remote_path = f"/path/to/sftp/directory/{myblob.name}"
+            remote_path = f"{sftp_filepath}/{myblob.name}"
             with sftp.file(remote_path, 'w') as remote_file:
                 remote_file.write(ascii_content)
             logging.info(f"File successfully uploaded to SFTP: {remote_path}")
@@ -63,3 +64,8 @@ def ascii2sftp(myblob: func.InputStream):
                 time.sleep(sftp_retry_delay_in_seconds)
             else:
                 logging.error("All retry attempts failed. Giving up.")
+                raise
+    # Log the completion of the function
+    logging.info("Function completed successfully.")
+    # Return a success message
+    return func.HttpResponse("File uploaded successfully to SFTP.", status_code=200)

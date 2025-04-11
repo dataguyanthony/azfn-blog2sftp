@@ -36,5 +36,5 @@ jobs:
     - name: Deploy to Azure Function App
       uses: azure/functions-action@v1
       with:
-        app-name: <your-function-app-name>  # Replace with your Azure Function App name
+        app-name: ${{ secrets.FUNCTION_NAME }}
         package: .

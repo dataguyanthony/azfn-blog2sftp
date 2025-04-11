@@ -1,6 +1,6 @@
 # Azure Function: ASCII SFTP Uploader
 
-This project is an Azure Function that listens for new files uploaded to an Azure Blob Storage container (`aspire-sftp/prod/inbound/EFT`). It processes the files by replacing non-ASCII characters with their ASCII equivalents and uploads the processed files to an SFTP server.
+This project is an Azure Function that listens for new files uploaded to an Azure Blob Storage container (`STORAGE_ACCOUNT_PATH`). It processes the files by replacing non-ASCII characters with their ASCII equivalents and uploads the processed files to an SFTP server.
 
 ---
 
@@ -81,7 +81,7 @@ az functionapp config appsettings set --name $FUNCTION_APP --resource-group $RES
 ```bash
 func start
 ```
-2. Upload a file to the `aspire-sftp/prod/inbound/EFT` container in your Azure Storage Account to trigger the function.
+2. Upload a file to the `STORAGE_ACCOUNT_PATH` container in your Azure Storage Account to trigger the function.
 
 ---
 
@@ -106,15 +106,16 @@ This project includes a GitHub Actions workflow for CI/CD. The workflow:
 ### Setting Up GitHub Secrets
 
 Add the following secrets to your GitHub repository:
-* `AZURE_CREDENTIALS`: JSON output from `az ad sp create-for-rbac`
+* `AZURE_CREDENTIALS`: JSON output from `az ad sp create-for-rbac` used in the Pipeline
+* `FUNCTION_NAME`: Name of your Azure Function used in the Pipeline
 * `STORAGE_ACCOUNT_NAME`: Azure Storage Account Name
 * `STORAGE_ACCOUNT_KEY`: Azure Storage Account Key
-* `STORAGE_ACCOUNT_FILE_PATH`: Container and storage path (don't include a trailing /)
+* `STORAGE_ACCOUNT_PATH`: Container and storage path (don't include a trailing /)
 * `KEY_VAULT_NAME`: ame of the Azure Keey Vault with you SFTP Password 
 * `SFTP_HOST`: SFTP Host where you need to upload the file
 * `SFTP_USERNAME`: SFTP Username user to connect to the SFTP
 * `SFTP_PASSWORD_SECRETNAME`: Key Vault secret where the SFTP Password is stored
-* `SFTP_UPLOAD_PATH`: / Preceding path on the host of what folder to upload the file to (don't include a trailing /)
+* `SFTP_PATH`: / Preceding path on the host of what folder to upload the file to (don't include a trailing /)
 
 ---
 
